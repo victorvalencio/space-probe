@@ -1,10 +1,9 @@
 package com.elo7.space_probe.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "module")
+@Table(name = "probe")
 public class Probe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
