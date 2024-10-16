@@ -1,16 +1,13 @@
 package com.elo7.space_probe.ui.planets;
 
+import com.elo7.space_probe.ui.ObstacleDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 public record PlanetCreateDTO(
-        @JsonProperty("name")
-        @NotNull(message = "Planet name can't be null")
-        String name,
-        @JsonProperty("width")
-        @NotNull(message = "Planet width can't be null")
-        Integer width,
-        @JsonProperty("height")
-        @NotNull(message = "Planet height can't be null")
-        Integer height
+        @JsonProperty("name") String name,
+        @JsonProperty("width") Integer width,
+        @JsonProperty("height") Integer height,
+        @JsonProperty("obstacles") List<ObstacleDTO> obstacles
 ) { }

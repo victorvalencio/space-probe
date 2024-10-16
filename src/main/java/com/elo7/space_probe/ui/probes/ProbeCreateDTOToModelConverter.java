@@ -5,8 +5,8 @@ import com.elo7.space_probe.domain.Probe;
 import org.springframework.stereotype.Component;
 
 @Component
-class ProbeCreateDTOToModelConverter {
+public class ProbeCreateDTOToModelConverter {
     public Probe convert(ProbeCreateDTO probeCreateDTO, Planet planet) {
-        return new Probe(probeCreateDTO.name(), probeCreateDTO.x(), probeCreateDTO.y(), planet);
+        return new Probe(probeCreateDTO.name(), probeCreateDTO.x(), probeCreateDTO.y(), planet, probeCreateDTO.direction());
     }
 }

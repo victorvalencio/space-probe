@@ -6,13 +6,14 @@ import com.elo7.space_probe.app.planets.FindPlanetService;
 import com.elo7.space_probe.domain.Planet;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/planets")
-class PlanetController {
+public class PlanetController {
 
     private final CreatePlanetService createPlanetService;
     private final FindPlanetService findPlanetService;
@@ -30,21 +31,22 @@ class PlanetController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    List<PlanetDTO> findAll() {
+    public List<PlanetDTO> findAll() {
         List<Planet> probes = findAllPlanetService.execute();
         return probes.stream().map(planetToDtoConverter::convert).toList();
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}")
-    PlanetDTO findById(@PathVariable("id") Integer id) {
-        Optional<Planet> probe = findPlanetService.execute(id);
-        return probe.map(planetToDtoConverter::convert).orElse(null);
+    public PlanetDTO findById(@PathVariable("id") Integer id) {
+        Optional<Planet> planet = findPlanetService.execute(id);
+        return planet.map(planetToDtoConverter::convert)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planet not found"));
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    PlanetDTO create(@RequestBody PlanetCreateDTO probeCreateDTO) {
+    public PlanetDTO create(@RequestBody PlanetCreateDTO probeCreateDTO) {
         Planet probe = planetCreateDTOToModelConverter.convert(probeCreateDTO);
         Planet createdProbe = createPlanetService.execute(probe);
         return planetToDtoConverter.convert(createdProbe);

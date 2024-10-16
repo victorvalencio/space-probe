@@ -1,5 +1,6 @@
 package com.elo7.space_probe.ui.probes;
 
+import com.elo7.space_probe.domain.Enum.Direction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,5 +16,7 @@ public record ProbeCreateDTO(
         Integer y,
         @JsonProperty("planet_id")
         @NotNull(message = "Probe planet_id can't be null")
-        Integer planetId
+        Integer planetId,
+        @NotNull(message = "Probe direction can't be null")
+        Direction direction
 ) { }

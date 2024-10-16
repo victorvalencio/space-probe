@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonda em Planeta</title>
+
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        #planet-grid {
+            display: grid;
+            grid-gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .probe {
+            background-color: yellow;
+        }
+        .obstacle {
+            background-color: red;
+        }
+    </style>
+</head>
+<body class="container">
+
+<h1 class="text-center mt-4">Controle de Sonda em Planeta</h1>
+
+<!-- Formulário para criar um planeta -->
+<h2>Criar Planeta</h2>
+<form id="create-planet-form" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="planet-name" class="form-label">Nome do Planeta</label>
+            <input type="text" id="planet-name" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label for="planet-width" class="form-label">Largura</label>
+            <input type="number" id="planet-width" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label for="planet-height" class="form-label">Altura</label>
+            <input type="number" id="planet-height" class="form-control" required>
+        </div>
+    </div>
+
+    <!-- Seção de obstáculos -->
+    <h3>Adicionar Obstáculos</h3>
+    <div id="obstacles-container"></div>
+    <button type="button" class="btn btn-secondary mb-3" id="add-obstacle">Adicionar Obstáculo</button>
+
+    <button type="submit" class="btn btn-primary">Criar Planeta</button>
+</form>
+
+<!-- Área para exibir o tabuleiro do planeta -->
+<div id="planet-grid" class="mb-4"></div>
+
+<!-- Formulário para criar uma sonda -->
+<h2>Criar Sonda</h2>
+<form id="create-probe-form" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="probe-name" class="form-label">Nome da Sonda</label>
+            <input type="text" id="probe-name" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label for="probe-x" class="form-label">Posição X</label>
+            <input type="number" id="probe-x" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label for="probe-y" class="form-label">Posição Y</label>
+            <input type="number" id="probe-y" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+            <label for="probe-direction" class="form-label">Direção Inicial</label>
+            <select id="probe-direction" class="form-select">
+                <option value="NORTH">Norte</option>
+                <option value="EAST">Leste</option>
+                <option value="SOUTH">Sul</option>
+                <option value="WEST">Oeste</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Criar Sonda</button>
+</form>
+
+<!-- Seleção da sonda a ser movimentada -->
+<h2>Selecionar Sonda</h2>
+<div class="row">
+    <div class="col-md-12">
+        <select id="select-probe" class="form-select mb-4"></select>
+    </div>
+</div>
+
+<!-- Formulário para mover a sonda -->
+<h2>Comandos de Movimento</h2>
+<div class="row">
+    <div class="col-md-12">
+        <form id="move-probe-form" class="mb-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <label for="probe-commands" class="form-label">Comandos (L, M, R)</label>
+                    <input type="text" id="probe-commands" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-warning mt-4">Mover Sonda</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let obstacles = [];
+    let planet = null;
+    let probes = [];
+
+    // Adicionar novo obstáculo
+    document.getElementById("add-obstacle").addEventListener("click", function () {
+        const obstacleContainer = document.getElementById("obstacles-container");
+        const obstacleIndex = obstacles.length;
+
+        const row = document.createElement("div");
+        row.classList.add("row", "mb-2");
+
+        const colX = document.createElement("div");
+        colX.classList.add("col-md-6");
+        const inputX = document.createElement("input");
+        inputX.type = "number";
+        inputX.classList.add("form-control");
+        inputX.placeholder = `Obstáculo ${obstacleIndex + 1} - X`;
+        colX.appendChild(inputX);
+
+        const colY = document.createElement("div");
+        colY.classList.add("col-md-6");
+        const inputY = document.createElement("input");
+        inputY.type = "number";
+        inputY.classList.add("form-control");
+        inputY.placeholder = `Obstáculo ${obstacleIndex + 1} - Y`;
+        colY.appendChild(inputY);
+
+        row.appendChild(colX);
+        row.appendChild(colY);
+        obstacleContainer.appendChild(row);
+
+        obstacles.push({ x: inputX, y: inputY });
+    });
+
+    // Função para criar o tabuleiro do planeta
+    function createPlanetGrid(width, height, obstaclesData) {
+        const planetGrid = document.getElementById("planet-grid");
+        planetGrid.style.gridTemplateColumns = `repeat(${width}, 50px)`;
+        planetGrid.style.gridTemplateRows = `repeat(${height}, 50px)`;
+        planetGrid.innerHTML = '';
+
+        for (let y = height - 1; y >= 0; y--) {
+            for (let x = 0; x < width; x++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                cell.id = `cell-${x}-${y}`;
+
+                // Verificar se há um obstáculo nesta célula
+                const isObstacle = obstaclesData.some(obstacle => obstacle.x === x && obstacle.y === y);
+                if (isObstacle) {
+                    cell.classList.add("obstacle");
+                }
+
+                planetGrid.appendChild(cell);
+            }
+        }
+    }
+
+    // Lidar com a criação do planeta
+    document.getElementById("create-planet-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("planet-name").value;
+        const width = parseInt(document.getElementById("planet-width").value);
+        const height = parseInt(document.getElementById("planet-height").value);
+
+        // Construir o array de obstáculos
+        const obstaclesData = obstacles.map(obstacle => ({
+            x: parseInt(obstacle.x.value),
+            y: parseInt(obstacle.y.value)
+        }));
+
+        // Criar o objeto do planeta
+        planet = {
+            name,
+            width: width,
+            height: height,
+            obstacles: obstaclesData
+        };
+
+        // Enviar o planeta ao backend
+        fetch('/v1/planets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(planet),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Planeta criado:", data);
+            createPlanetGrid(width, height, obstaclesData); // Criar o tabuleiro após o planeta ser criado
+        })
+        .catch(error => console.error("Erro ao criar o planeta:", error));
+    });
+
+    // Prevenir o refresh da página na criação da sonda
+    document.getElementById("create-probe-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("probe-name").value;
+        const x = parseInt(document.getElementById("probe-x").value);
+        const y = parseInt(document.getElementById("probe-y").value);
+        const direction = document.getElementById("probe-direction").value;
+
+        const newProbe = { name, x, y, direction };
+
+        // Enviar a sonda ao backend
+        fetch('/v1/probes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newProbe),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Sonda criada:", data);
+            placeProbeOnGrid(newProbe); // Posicionar a sonda no tabuleiro
+            probes.push(newProbe); // Adicionar a sonda à lista de sondas
+            updateProbeSelection(); // Atualizar a lista de seleção de sondas
+        })
+        .catch(error => console.error("Erro ao criar a sonda:", error));
+    });
+
+    // Função para posicionar a sonda no tabuleiro
+    function placeProbeOnGrid(probe) {
+        const cell = document.getElementById(`cell-${probe.x}-${probe.y}`);
+        if (cell) {
+            cell.classList.add("probe");
+            cell.textContent = "S";
+        }
+    }
+
+    // Função para atualizar a lista de seleção de sondas
+    function updateProbeSelection() {
+        const selectProbe = document.getElementById("select-probe");
+        selectProbe.innerHTML = ''; // Limpar as opções atuais
+
+        probes.forEach((probe, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `${probe.name} (Pos: ${probe.x}, ${probe.y})`;
+            selectProbe.appendChild(option);
+        });
+    }
+
+    // Lidar com a movimentação da sonda
+    document.getElementById("move-probe-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevenir o refresh da página
+
+        const commands = document.getElementById("probe-commands").value;
+        const selectedProbeIndex = document.getElementById("select-probe").value;
+        const selectedProbe = probes[selectedProbeIndex];
+
+        if (selectedProbe && planet) {
+            // Processar os comandos
+            for (let command of commands.toUpperCase()) {
+                let oldX = selectedProbe.x;
+                let oldY = selectedProbe.y;
+
+                switch (command) {
+                    case 'L':
+                        selectedProbe.direction = rotateLeft(selectedProbe.direction);
+                        break;
+                    case 'R':
+                        selectedProbe.direction = rotateRight(selectedProbe.direction);
+                        break;
+                    case 'M':
+                        const newPosition = moveForward(selectedProbe.x, selectedProbe.y, selectedProbe.direction, planet.width, planet.height);
+
+                        // Verificar se o novo movimento está fora dos limites do planeta
+                        if (newPosition.x < 0 || newPosition.x >= planet.width || newPosition.y < 0 || newPosition.y >= planet.height) {
+                            alert(`A sonda está tentando sair dos limites do planeta! Posição inválida: (${newPosition.x}, ${newPosition.y})`);
+                            return; // Parar o movimento se estiver fora dos limites
+                        }
+
+                        // Verificar se o novo movimento colide com algum obstáculo
+                        const isObstacle = planet.obstacles.some(obstacle => obstacle.x === newPosition.x && obstacle.y === newPosition.y);
+                        if (isObstacle) {
+                            alert(`A sonda encontrou um obstáculo na posição (${newPosition.x}, ${newPosition.y})!`);
+                            return; // Parar o movimento se houver obstáculo
+                        }
+
+                        // Verificar se o novo movimento colide com outra sonda
+                        const isCollidingWithProbe = probes.some(probe => probe.x === newPosition.x && probe.y === newPosition.y && probe !== selectedProbe);
+                        if (isCollidingWithProbe) {
+                            alert(`A sonda colidiu com outra sonda na posição (${newPosition.x}, ${newPosition.y})!`);
+                            return; // Parar o movimento se houver colisão com outra sonda
+                        }
+
+                        selectedProbe.x = newPosition.x;
+                        selectedProbe.y = newPosition.y;
+                        break;
+                }
+
+                // Atualizar a posição da sonda no tabuleiro
+                moveProbeOnGrid(selectedProbe.x, selectedProbe.y, oldX, oldY);
+            }
+        }
+    });
+
+    // Função para mover a sonda no tabuleiro
+    function moveProbeOnGrid(newX, newY, oldX, oldY) {
+        const oldCell = document.getElementById(`cell-${oldX}-${oldY}`);
+        const newCell = document.getElementById(`cell-${newX}-${newY}`);
+        if (oldCell) {
+            oldCell.classList.remove("probe");
+            oldCell.textContent = "";
+        }
+        if (newCell) {
+            newCell.classList.add("probe");
+            newCell.textContent = "S";
+        }
+    }
+
+    // Função para girar para a esquerda
+    function rotateLeft(direction) {
+        const directions = ['NORTH', 'WEST', 'SOUTH', 'EAST'];
+        return directions[(directions.indexOf(direction) + 1) % directions.length];
+    }
+
+    // Função para girar para a direita
+    function rotateRight(direction) {
+        const directions = ['NORTH', 'EAST', 'SOUTH', 'WEST'];
+        return directions[(directions.indexOf(direction) + 1) % directions.length];
+    }
+
+    // Função para mover a sonda para frente
+    function moveForward(x, y, direction, planetWidth, planetHeight) {
+        let newX = x;
+        let newY = y;
+
+        switch (direction) {
+            case 'NORTH':
+                newY++;
+                break;
+            case 'SOUTH':
+                newY--;
+                break;
+            case 'EAST':
+                newX++;
+                break;
+            case 'WEST':
+                newX--;
+                break;
+        }
+
+        return { x: newX, y: newY };
+    }
+
+</script>
+
+<!-- Bootstrap JS (opcional) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
