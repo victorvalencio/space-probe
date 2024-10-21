@@ -1,25 +1,49 @@
 package com.elo7.space_probe.domain.Enum;
 
 public enum Direction {
-    NORTH, EAST, SOUTH, WEST;
-
-    public Direction turnLeft() {
-        switch (this) {
-            case NORTH: return WEST;
-            case WEST: return SOUTH;
-            case SOUTH: return EAST;
-            case EAST: return NORTH;
-            default: return this;
+    NORTH {
+        @Override
+        public Direction turnLeft() {
+            return WEST;
         }
-    }
 
-    public Direction turnRight() {
-        switch (this) {
-            case NORTH: return EAST;
-            case EAST: return SOUTH;
-            case SOUTH: return WEST;
-            case WEST: return NORTH;
-            default: return this;
+        @Override
+        public Direction turnRight() {
+            return EAST;
         }
-    }
+    }, EAST {
+        @Override
+        public Direction turnLeft() {
+            return NORTH;
+        }
+
+        @Override
+        public Direction turnRight() {
+            return SOUTH;
+        }
+    }, SOUTH {
+        @Override
+        public Direction turnLeft() {
+            return EAST;
+        }
+
+        @Override
+        public Direction turnRight() {
+            return WEST;
+        }
+    }, WEST {
+        @Override
+        public Direction turnLeft() {
+            return SOUTH;
+        }
+
+        @Override
+        public Direction turnRight() {
+            return NORTH;
+        }
+    };
+
+    public abstract Direction turnLeft();
+
+    public abstract Direction turnRight();
 }

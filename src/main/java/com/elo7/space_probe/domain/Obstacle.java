@@ -5,29 +5,24 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class Obstacle {
 
-    private Integer x;
-    private Integer y;
+    private Position position;
 
     public Obstacle() {}
 
-    public Obstacle(Integer x, Integer y) {
-        this.x = x;
-        this.y = y;
+    public Obstacle(Position position) {
+        this.position = position;
     }
 
     public Integer getX() {
-        return x;
-    }
-
-    public void setX(Integer x) {
-        this.x = x;
+        return position.getX();
     }
 
     public Integer getY() {
-        return y;
+        return position.getY();
     }
 
-    public void setY(Integer y) {
-        this.y = y;
+    public Position getPosition() {
+        return position;
     }
+
 }

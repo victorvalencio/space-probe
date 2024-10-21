@@ -2,10 +2,7 @@ package ServiceTest;
 
 import com.elo7.space_probe.app.probes.ProbeMovementService;
 import com.elo7.space_probe.domain.Enum.Direction;
-import com.elo7.space_probe.domain.Obstacle;
-import com.elo7.space_probe.domain.Planet;
-import com.elo7.space_probe.domain.Probe;
-import com.elo7.space_probe.infra.repository.SpringDataProbeRepository;
+import com.elo7.space_probe.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,7 +22,7 @@ class ProbeMovementServiceTest {
     private ProbeMovementService probeMovementService;
 
     @Mock
-    private SpringDataProbeRepository probeRepository;
+    private Probes probeRepository;
 
     @Mock
     private Planet planet;
@@ -42,7 +39,7 @@ class ProbeMovementServiceTest {
         when(planet.getHeight()).thenReturn(5);
 
         List<Obstacle> obstacles = new ArrayList<>();
-        obstacles.add(new Obstacle(2, 2));
+        obstacles.add(new Obstacle(new Position(2,2)));
         when(planet.getObstacles()).thenReturn(obstacles);
     }
 

@@ -42,7 +42,7 @@ public class Probe {
     public String getName() {
         return name;
     }
-    
+
     public Position getPosition() {
         return position;
     }
@@ -76,26 +76,34 @@ public class Probe {
     }
 
     public void move() {
-        System.out.println("Movendo sonda na direção: " + direction);
+
+        int nextX = this.getPosition().getX();
+        int nextY = this.getPosition().getY();
+
         switch (direction) {
-            case NORTH -> {
-                position.setY(position.getY() + 1);
-                System.out.println("Nova posição: (" + position.getX() + ", " + position.getY() + ")");
-            }
-            case SOUTH -> {
-                position.setY(position.getY() - 1);
-                System.out.println("Nova posição: (" + position.getX() + ", " + position.getY() + ")");
-            }
-            case EAST -> {
-                position.setX(position.getX() + 1);
-                System.out.println("Nova posição: (" + position.getX() + ", " + position.getY() + ")");
-            }
-            case WEST -> {
-                position.setX(position.getX() - 1);
-                System.out.println("Nova posição: (" + position.getX() + ", " + position.getY() + ")");
-            }
+            case NORTH -> nextY += 1;
+            case SOUTH -> nextY -= 1;
+            case EAST -> nextX += 1;
+            case WEST -> nextX -= 1;
         }
+
+        Position newPosition = new Position(nextX, nextY);
+        if (planet.isPositionOutOfBoundiers(newPosition)) {
+            throw new RuntimeException("Sonda está tentando mover-se para fora dos limites do planeta!");
+        }
+
+        if (planet.hasObstacleAt(newPosition)) {
+            throw new RuntimeException("Obstáculo encontrado na posição ("
+                    + newPosition.getX() + ", " + newPosition.getY() + ")");
+        }
+
+        if (planet.isCollidingWithAnotherProbe(newPosition)) {
+            throw new RuntimeException("Colisão detectada! Outra sonda já está na posição ("
+                    + newPosition.getX() + ", " + newPosition.getY() + ")");
+        }
+        this.position = newPosition;
     }
+
 
     public void setId(int i) {
     }

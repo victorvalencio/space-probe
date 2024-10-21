@@ -1,8 +1,8 @@
 package ServiceTest;
 
 import com.elo7.space_probe.domain.Probe;
+import com.elo7.space_probe.domain.Probes;
 import com.elo7.space_probe.infra.repository.SpringDataProbeRepository;
-import com.elo7.space_probe.app.probes.ProbeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 class ProbeServiceTest {
 
     @InjectMocks
-    private ProbeService probeService;
+    private Probes probeService;
 
     @Mock
     private SpringDataProbeRepository probeRepository;

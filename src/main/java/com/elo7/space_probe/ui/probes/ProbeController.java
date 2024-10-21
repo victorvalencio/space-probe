@@ -22,10 +22,8 @@ public class ProbeController {
     private final ProbeCreateDTOToModelConverter probeCreateDTOToModelConverter;
     private final ProbeToDtoConverter probeToDtoConverter;
     private final ProbeMovementService probeMovementService;
-    private final ProbeService probeService;
 
-    ProbeController(CreateProbeService createProbeService, FindProbeService findProbeService, FindPlanetService findPlanetService, FindAllProbeService findAllProbeService, ProbeCreateDTOToModelConverter probeCreateDTOToModelConverter, ProbeToDtoConverter probeToDtoConverter, ProbeMovementService probeMovementService, ProbeService probeService) {
-        this.probeService = probeService;
+    ProbeController(CreateProbeService createProbeService, FindProbeService findProbeService, FindPlanetService findPlanetService, FindAllProbeService findAllProbeService, ProbeCreateDTOToModelConverter probeCreateDTOToModelConverter, ProbeToDtoConverter probeToDtoConverter, ProbeMovementService probeMovementService) {
         this.createProbeService = createProbeService;
         this.findProbeService = findProbeService;
         this.findPlanetService = findPlanetService;
@@ -63,12 +61,10 @@ public class ProbeController {
 
     @PostMapping("/{id}/move")
     public ProbeDTO moveProbe(@PathVariable("id") Integer id, @RequestBody String commands) {
-        Probe probe = probeService.findById(id)
+        Probe probe = findProbeService.execute(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Probe not found"));
 
         probeMovementService.move(probe, commands);
-
-        probeService.save(probe);
 
         return probeToDtoConverter.convert(probe);
     }

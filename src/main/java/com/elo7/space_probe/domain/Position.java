@@ -1,8 +1,9 @@
 package com.elo7.space_probe.domain;
 
-import com.elo7.space_probe.domain.Enum.Direction;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
+import java.util.Objects;
 
 @Embeddable
 public class Position {
@@ -37,17 +38,16 @@ public class Position {
         this.y = y;
     }
 
-    public Position getNextPosition(Direction direction) {
-        int nextX = this.x;
-        int nextY = this.y;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return Objects.equals(x, position.x) && Objects.equals(y, position.y);
+    }
 
-        switch (direction) {
-            case NORTH -> nextY += 1;
-            case SOUTH -> nextY -= 1;
-            case EAST  -> nextX += 1;
-            case WEST  -> nextX -= 1;
-        }
-
-        return new Position(nextX, nextY);
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
     }
 }

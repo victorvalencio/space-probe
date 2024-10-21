@@ -3,6 +3,7 @@ package com.elo7.space_probe.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,8 @@ public class Planet {
     private List<Probe> probes;
 
     @Deprecated
-    public Planet() {}
+    public Planet() {
+    }
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "planet_obstacles", joinColumns = @JoinColumn(name = "planet_id"))
@@ -83,7 +85,16 @@ public class Planet {
         this.obstacles.add(obstacle);
     }
 
-    public boolean hasObstacleAt(int x, int y) {
-        return obstacles.stream().anyMatch(o -> o.getX() == x && o.getY() == y);
+    public boolean hasObstacleAt(Position position) {
+        return obstacles.stream().map(Obstacle::getPosition).anyMatch(position::equals);
+    }
+
+    public boolean isPositionOutOfBoundiers(Position newPosition) {
+        return newPosition.getX() < 0 || newPosition.getX() > getWidth() ||
+                newPosition.getY() < 0 || newPosition.getY() > getHeight();
+    }
+
+    public boolean isCollidingWithAnotherProbe(Position nextPosition) {
+        return this.getProbes().stream().map(Probe::getPosition).anyMatch(nextPosition::equals);
     }
 }

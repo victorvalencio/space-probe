@@ -2,6 +2,7 @@ package com.elo7.space_probe.ui;
 
 import com.elo7.space_probe.domain.Planet;
 import com.elo7.space_probe.domain.Obstacle;
+import com.elo7.space_probe.domain.Position;
 import com.elo7.space_probe.ui.planets.PlanetToDtoConverter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,8 +24,8 @@ class PlanetToDtoConverterTest {
     void testConvertPlanetToPlanetDTO() {
         var planet = new Planet("Earth", 10, 10);
         planet.setId(1);
-        planet.addObstacle(new Obstacle(2, 3));
-        planet.addObstacle(new Obstacle(4, 5));
+        planet.addObstacle(new Obstacle(new Position(2, 3)));
+        planet.addObstacle(new Obstacle(new Position(4, 5)));
 
         var planetDTO = planetToDtoConverter.convert(planet);
 
